@@ -21,24 +21,31 @@ export function RetirementCalculatorComponent() {
   const [expectedReturn, setExpectedReturn] = useState(7);
   const [socialSecurityBenefit, setSocialSecurityBenefit] = useState(20000);
   const [annualExpenses, setAnnualExpenses] = useState(50000);
+  const [inflationRate, setInflationRate] = useState(3); // New state for inflation rate
 
   const calculateRetirementIncome = (age: number) => {
     const yearsUntilRetirement = Math.max(0, age - currentAge);
+    
+    // Adjust expenses and social security for inflation
+    const adjustedAnnualExpenses = annualExpenses * Math.pow(1 + inflationRate / 100, yearsUntilRetirement);
+    const adjustedSocialSecurityBenefit = socialSecurityBenefit * Math.pow(1 + inflationRate / 100, yearsUntilRetirement);
+
     const totalSavings =
       currentSavings *
         Math.pow(1 + expectedReturn / 100, yearsUntilRetirement) +
       annualContribution *
         ((Math.pow(1 + expectedReturn / 100, yearsUntilRetirement) - 1) /
           (expectedReturn / 100));
+    
     const annualInvestmentIncome = totalSavings * 0.04; // Using the 4% rule
-    const totalAnnualIncome = annualInvestmentIncome + socialSecurityBenefit;
-    const netIncome = totalAnnualIncome - annualExpenses;
+    const totalAnnualIncome = annualInvestmentIncome + adjustedSocialSecurityBenefit; // Total income includes adjusted Social Security
+    const netIncome = totalAnnualIncome - adjustedAnnualExpenses; // Net income after adjusted expenses
 
     return {
       investmentIncome: Math.round(annualInvestmentIncome),
-      socialSecurity: socialSecurityBenefit,
+      socialSecurity: adjustedSocialSecurityBenefit,
       totalIncome: Math.round(totalAnnualIncome),
-      expenses: annualExpenses,
+      expenses: adjustedAnnualExpenses,
       netIncome: Math.round(netIncome),
     };
   };
@@ -161,6 +168,17 @@ export function RetirementCalculatorComponent() {
             value={annualExpenses || ""}
             onChange={(e) =>
               setAnnualExpenses(e.target.value ? Number(e.target.value) : 0)
+            }
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="inflation-rate">Expected Annual Inflation Rate (%)</Label>
+          <Input
+            id="inflation-rate"
+            type="number"
+            value={inflationRate || ""}
+            onChange={(e) =>
+              setInflationRate(e.target.value ? Number(e.target.value) : 0)
             }
           />
         </div>
