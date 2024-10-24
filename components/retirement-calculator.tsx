@@ -15,7 +15,7 @@ import { Slider } from "@/components/ui/slider";
 
 export function RetirementCalculatorComponent() {
   const [currentAge, setCurrentAge] = useState(30);
-  const [retirementAge, setRetirementAge] = useState(65);
+  // const [retirementAge, setRetirementAge] = useState(65);
   const [currentSavings, setCurrentSavings] = useState(100000);
   const [annualContribution, setAnnualContribution] = useState(10000);
   const [expectedReturn, setExpectedReturn] = useState(7);
@@ -145,7 +145,7 @@ export function RetirementCalculatorComponent() {
         </div>
         <div className="space-y-2">
           <Label htmlFor="social-security">
-            Expected Annual Social Security Benefit ($)
+            Current Annual Social Security Benefit ($)
           </Label>
           <Input
             id="social-security"
@@ -159,9 +159,7 @@ export function RetirementCalculatorComponent() {
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="annual-expenses">
-            Expected Annual Expenses in Retirement ($)
-          </Label>
+          <Label htmlFor="annual-expenses">Current Annual Expenses ($)</Label>
           <Input
             id="annual-expenses"
             type="number"
