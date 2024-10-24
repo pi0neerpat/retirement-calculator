@@ -25,10 +25,13 @@ export function RetirementCalculatorComponent() {
 
   const calculateRetirementIncome = (age: number) => {
     const yearsUntilRetirement = Math.max(0, age - currentAge);
-    
+
     // Adjust expenses and social security for inflation
-    const adjustedAnnualExpenses = annualExpenses * Math.pow(1 + inflationRate / 100, yearsUntilRetirement);
-    const adjustedSocialSecurityBenefit = socialSecurityBenefit * Math.pow(1 + inflationRate / 100, yearsUntilRetirement);
+    const adjustedAnnualExpenses =
+      annualExpenses * Math.pow(1 + inflationRate / 100, yearsUntilRetirement);
+    const adjustedSocialSecurityBenefit =
+      socialSecurityBenefit *
+      Math.pow(1 + inflationRate / 100, yearsUntilRetirement);
 
     const totalSavings =
       currentSavings *
@@ -36,12 +39,14 @@ export function RetirementCalculatorComponent() {
       annualContribution *
         ((Math.pow(1 + expectedReturn / 100, yearsUntilRetirement) - 1) /
           (expectedReturn / 100));
-    
+
     const annualInvestmentIncome = totalSavings * 0.04; // Using the 4% rule
-    const totalAnnualIncome = annualInvestmentIncome + adjustedSocialSecurityBenefit; // Total income includes adjusted Social Security
+    const totalAnnualIncome =
+      annualInvestmentIncome + adjustedSocialSecurityBenefit; // Total Annual income includes adjusted Social Security
     const netIncome = totalAnnualIncome - adjustedAnnualExpenses; // Net income after adjusted expenses
 
     return {
+      totalSavings: Math.round(totalSavings),
       investmentIncome: Math.round(annualInvestmentIncome),
       socialSecurity: adjustedSocialSecurityBenefit,
       totalIncome: Math.round(totalAnnualIncome),
@@ -63,17 +68,12 @@ export function RetirementCalculatorComponent() {
       </CardHeader>
 
       <CardContent className="space-y-6">
-        <div className="w-full mt-4 p-4 bg-muted rounded-lg">
+        <div className="w-full  p-4 bg-muted rounded-lg">
           <h4 className="font-semibold mb-2">How to Use This Calculator:</h4>
           <ol className="list-decimal list-inside space-y-1 text-sm">
-            <li>Enter your current details.</li>
             <li>
               Estimate your expected annual investment return, annual Social
               Security benefit, and annual expenses.
-            </li>
-            <li>
-              Your projected income will be displayed for both 65 and 75 years
-              old.
             </li>
           </ol>
           <p className="mt-2 text-sm text-muted-foreground">
@@ -96,7 +96,7 @@ export function RetirementCalculatorComponent() {
             <span>{currentAge} years old</span>
           </div>
         </div>
-        <div className="space-y-2">
+        {/* <div className="space-y-2">
           <Label htmlFor="retirement-age">Retirement Age</Label>
           <Slider
             id="retirement-age"
@@ -109,9 +109,9 @@ export function RetirementCalculatorComponent() {
           <div className="flex justify-between text-sm text-muted-foreground">
             <span>{retirementAge} years old</span>
           </div>
-        </div>
+        </div> */}
         <div className="space-y-2">
-          <Label htmlFor="current-savings">Current Savings ($)</Label>
+          <Label htmlFor="current-savings">Current Investment ($)</Label>
           <Input
             id="current-savings"
             type="number"
@@ -172,7 +172,9 @@ export function RetirementCalculatorComponent() {
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="inflation-rate">Expected Annual Inflation Rate (%)</Label>
+          <Label htmlFor="inflation-rate">
+            Expected Annual Inflation Rate (%)
+          </Label>
           <Input
             id="inflation-rate"
             type="number"
@@ -183,75 +185,106 @@ export function RetirementCalculatorComponent() {
           />
         </div>
       </CardContent>
-      <CardFooter className="flex-col space-y-4">
-        <div className="w-full space-y-2">
-          <h3 className="text-lg font-semibold">
-            Projected Annual Income at Age 65
-          </h3>
-          <div className="flex justify-between">
-            <span>Investment Income:</span>
-            <span className="text-right flex-1">
-              {formatCurrency(incomeAt65.investmentIncome)}
-            </span>
+      <CardFooter className="block">
+        <h1 className="text-lg font-semibold">
+          Annual Projections at Retirement
+        </h1>
+        <div className="flex flex-row space-x-10">
+          <div className="my-2 space-y-2 w-full ">
+            <h3 className="text-lg font-semibold ">Age 65</h3>
+            <table className="w-full">
+              <tbody>
+                <tr>
+                  <td>Total Investment:</td>
+                  <td className="text-right">
+                    {formatCurrency(incomeAt65.totalSavings)}
+                  </td>
+                </tr>
+                <tr>
+                  <td>Investment Income:</td>
+                  <td className="text-right">
+                    {formatCurrency(incomeAt65.investmentIncome)}
+                  </td>
+                </tr>
+                <tr>
+                  <td>Social Security:</td>
+                  <td className="text-right">
+                    {formatCurrency(incomeAt65.socialSecurity)}
+                  </td>
+                </tr>
+                <tr>
+                  <td>Total Income:</td>
+                  <td className="text-right">
+                    {formatCurrency(incomeAt65.totalIncome)}
+                  </td>
+                </tr>
+                <tr>
+                  <td>Expenses:</td>
+                  <td className="text-right">
+                    {formatCurrency(incomeAt65.expenses)}
+                  </td>
+                </tr>
+                <tr>
+                  <td colSpan="2">
+                    <hr className="border-t border-gray-300" />
+                  </td>
+                </tr>
+                <tr>
+                  <td className="font-bold">Net Income:</td>
+                  <td className="text-right font-bold">
+                    {formatCurrency(incomeAt65.netIncome)}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </div>
-          <div className="flex justify-between">
-            <span>Social Security:</span>
-            <span className="text-right flex-1">
-              {formatCurrency(incomeAt65.socialSecurity)}
-            </span>
-          </div>
-          <div className="flex justify-between">
-            <span>Total Income:</span>
-            <span className="text-right flex-1">
-              {formatCurrency(incomeAt65.totalIncome)}
-            </span>
-          </div>
-          <div className="flex justify-between">
-            <span>Expenses:</span>
-            <span className="text-right flex-1">
-              {formatCurrency(incomeAt65.expenses)}
-            </span>
-          </div>
-          <div className="flex justify-between font-bold">
-            <span>Net Income:</span>
-            <span className="text-right flex-1">
-              {formatCurrency(incomeAt65.netIncome)}
-            </span>
-          </div>
-        </div>
-        <div className="w-full space-y-2">
-          <h3 className="text-lg font-semibold">
-            Projected Annual Income at Age 75
-          </h3>
-          <div className="flex justify-between">
-            <span>Investment Income:</span>
-            <span className="text-right flex-1">
-              {formatCurrency(incomeAt75.investmentIncome)}
-            </span>
-          </div>
-          <div className="flex justify-between">
-            <span>Social Security:</span>
-            <span className="text-right flex-1">
-              {formatCurrency(incomeAt75.socialSecurity)}
-            </span>
-          </div>
-          <div className="flex justify-between">
-            <span>Total Income:</span>
-            <span className="text-right flex-1">
-              {formatCurrency(incomeAt75.totalIncome)}
-            </span>
-          </div>
-          <div className="flex justify-between">
-            <span>Expenses:</span>
-            <span className="text-right flex-1">
-              {formatCurrency(incomeAt75.expenses)}
-            </span>
-          </div>
-          <div className="flex justify-between font-bold">
-            <span>Net Income:</span>
-            <span className="text-right flex-1">
-              {formatCurrency(incomeAt75.netIncome)}
-            </span>
+          <div className="my-2 space-y-2 w-full">
+            <h3 className="text-lg font-semibold">Age 75</h3>
+            <table className="w-full">
+              <tbody>
+                <tr>
+                  <td>Total Investment:</td>
+                  <td className="text-right">
+                    {formatCurrency(incomeAt75.totalSavings)}
+                  </td>
+                </tr>
+                <tr>
+                  <td>Investment Income:</td>
+                  <td className="text-right">
+                    {formatCurrency(incomeAt75.investmentIncome)}
+                  </td>
+                </tr>
+                <tr>
+                  <td>Social Security:</td>
+                  <td className="text-right">
+                    {formatCurrency(incomeAt75.socialSecurity)}
+                  </td>
+                </tr>
+                <tr>
+                  <td>Total Income:</td>
+                  <td className="text-right">
+                    {formatCurrency(incomeAt75.totalIncome)}
+                  </td>
+                </tr>
+                <tr>
+                  <td>Annual Expenses:</td>
+                  <td className="text-right">
+                    {formatCurrency(incomeAt75.expenses)}
+                  </td>
+                </tr>
+                <tr>
+                  <td colSpan="2">
+                    <hr className="border-t border-gray-300" />
+                  </td>
+                </tr>
+                <tr>
+                  <td className="font-bold">Net Income:</td>
+                  <td className="text-right font-bold">
+                    {formatCurrency(incomeAt75.netIncome)}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
       </CardFooter>
@@ -261,5 +294,5 @@ export function RetirementCalculatorComponent() {
 
 // Utility function to format numbers as currency using vanilla JavaScript
 function formatCurrency(value: number) {
-  return `$${Number(value).toLocaleString()}`;
+  return `$${Number(value.toFixed(0)).toLocaleString()}`;
 }
