@@ -15,35 +15,36 @@ import { Slider } from "@/components/ui/slider";
 
 export function RetirementCalculatorComponent() {
   const [currentAge, setCurrentAge] = useState(30);
-  // const [retirementAge, setRetirementAge] = useState(65);
   const [currentSavings, setCurrentSavings] = useState(100000);
   const [annualContribution, setAnnualContribution] = useState(10000);
   const [expectedReturn, setExpectedReturn] = useState(7);
   const [socialSecurityBenefit, setSocialSecurityBenefit] = useState(20000);
   const [annualExpenses, setAnnualExpenses] = useState(50000);
-  const [inflationRate, setInflationRate] = useState(3); // New state for inflation rate
+  const [inflationRate, setInflationRate] = useState(3);
+
+  const formatNumberWithCommas = (value: number) => {
+    return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  };
+
+  const handleInputChange = (setter: React.Dispatch<React.SetStateAction<number>>, value: string) => {
+    const numericValue = value.replace(/,/g, ""); // Remove commas
+    setter(numericValue ? Number(numericValue) : 0);
+  };
 
   const calculateRetirementIncome = (age: number) => {
     const yearsUntilRetirement = Math.max(0, age - currentAge);
-
-    // Adjust expenses and social security for inflation
     const adjustedAnnualExpenses =
       annualExpenses * Math.pow(1 + inflationRate / 100, yearsUntilRetirement);
     const adjustedSocialSecurityBenefit =
-      socialSecurityBenefit *
-      Math.pow(1 + inflationRate / 100, yearsUntilRetirement);
+      socialSecurityBenefit * Math.pow(1 + inflationRate / 100, yearsUntilRetirement);
 
     const totalSavings =
-      currentSavings *
-        Math.pow(1 + expectedReturn / 100, yearsUntilRetirement) +
-      annualContribution *
-        ((Math.pow(1 + expectedReturn / 100, yearsUntilRetirement) - 1) /
-          (expectedReturn / 100));
+      currentSavings * Math.pow(1 + expectedReturn / 100, yearsUntilRetirement) +
+      annualContribution * ((Math.pow(1 + expectedReturn / 100, yearsUntilRetirement) - 1) / (expectedReturn / 100));
 
-    const annualInvestmentIncome = totalSavings * 0.04; // Using the 4% rule
-    const totalAnnualIncome =
-      annualInvestmentIncome + adjustedSocialSecurityBenefit; // Total Annual income includes adjusted Social Security
-    const netIncome = totalAnnualIncome - adjustedAnnualExpenses; // Net income after adjusted expenses
+    const annualInvestmentIncome = totalSavings * 0.04;
+    const totalAnnualIncome = annualInvestmentIncome + adjustedSocialSecurityBenefit;
+    const netIncome = totalAnnualIncome - adjustedAnnualExpenses;
 
     return {
       totalSavings: Math.round(totalSavings),
@@ -68,7 +69,7 @@ export function RetirementCalculatorComponent() {
       </CardHeader>
 
       <CardContent className="space-y-6">
-        <div className="w-full  p-4 bg-muted rounded-lg">
+        <div className="w-full p-4 bg-muted rounded-lg">
           <h4 className="font-semibold mb-2">How to Use This Calculator:</h4>
           <ol className="list-decimal list-inside space-y-1 text-sm">
             <li>
@@ -96,40 +97,22 @@ export function RetirementCalculatorComponent() {
             <span>{currentAge} years old</span>
           </div>
         </div>
-        {/* <div className="space-y-2">
-          <Label htmlFor="retirement-age">Retirement Age</Label>
-          <Slider
-            id="retirement-age"
-            min={50}
-            max={80}
-            step={1}
-            value={[retirementAge]}
-            onValueChange={(value) => setRetirementAge(value[0])}
-          />
-          <div className="flex justify-between text-sm text-muted-foreground">
-            <span>{retirementAge} years old</span>
-          </div>
-        </div> */}
         <div className="space-y-2">
           <Label htmlFor="current-savings">Current Investment ($)</Label>
           <Input
             id="current-savings"
-            type="number"
-            value={currentSavings || ""}
-            onChange={(e) =>
-              setCurrentSavings(e.target.value ? Number(e.target.value) : 0)
-            }
+            type="text"
+            value={formatNumberWithCommas(currentSavings)}
+            onChange={(e) => handleInputChange(setCurrentSavings, e.target.value)}
           />
         </div>
         <div className="space-y-2">
           <Label htmlFor="annual-contribution">Annual Contribution ($)</Label>
           <Input
             id="annual-contribution"
-            type="number"
-            value={annualContribution || ""}
-            onChange={(e) =>
-              setAnnualContribution(e.target.value ? Number(e.target.value) : 0)
-            }
+            type="text"
+            value={formatNumberWithCommas(annualContribution)}
+            onChange={(e) => handleInputChange(setAnnualContribution, e.target.value)}
           />
         </div>
         <div className="space-y-2">
@@ -138,9 +121,7 @@ export function RetirementCalculatorComponent() {
             id="expected-return"
             type="number"
             value={expectedReturn || ""}
-            onChange={(e) =>
-              setExpectedReturn(e.target.value ? Number(e.target.value) : 0)
-            }
+            onChange={(e) => setExpectedReturn(e.target.value ? Number(e.target.value) : 0)}
           />
         </div>
         <div className="space-y-2">
@@ -149,24 +130,18 @@ export function RetirementCalculatorComponent() {
           </Label>
           <Input
             id="social-security"
-            type="number"
-            value={socialSecurityBenefit || ""}
-            onChange={(e) =>
-              setSocialSecurityBenefit(
-                e.target.value ? Number(e.target.value) : 0
-              )
-            }
+            type="text"
+            value={formatNumberWithCommas(socialSecurityBenefit)}
+            onChange={(e) => handleInputChange(setSocialSecurityBenefit, e.target.value)}
           />
         </div>
         <div className="space-y-2">
           <Label htmlFor="annual-expenses">Current Annual Expenses ($)</Label>
           <Input
             id="annual-expenses"
-            type="number"
-            value={annualExpenses || ""}
-            onChange={(e) =>
-              setAnnualExpenses(e.target.value ? Number(e.target.value) : 0)
-            }
+            type="text"
+            value={formatNumberWithCommas(annualExpenses)}
+            onChange={(e) => handleInputChange(setAnnualExpenses, e.target.value)}
           />
         </div>
         <div className="space-y-2">
@@ -177,9 +152,7 @@ export function RetirementCalculatorComponent() {
             id="inflation-rate"
             type="number"
             value={inflationRate || ""}
-            onChange={(e) =>
-              setInflationRate(e.target.value ? Number(e.target.value) : 0)
-            }
+            onChange={(e) => setInflationRate(e.target.value ? Number(e.target.value) : 0)}
           />
         </div>
       </CardContent>
