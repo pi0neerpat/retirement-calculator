@@ -45,9 +45,11 @@ export function RetirementCalculatorComponent() {
     const totalSavings =
       currentSavings *
         Math.pow(1 + expectedReturn / 100, yearsUntilRetirement) +
-      annualContribution *
-        ((Math.pow(1 + expectedReturn / 100, yearsUntilRetirement) - 1) /
-          (expectedReturn / 100));
+      (age <= 65
+        ? annualContribution *
+          ((Math.pow(1 + expectedReturn / 100, yearsUntilRetirement) - 1) /
+            (expectedReturn / 100))
+        : 0);
 
     const annualInvestmentIncome = totalSavings * 0.04;
     const totalAnnualIncome =
@@ -64,8 +66,27 @@ export function RetirementCalculatorComponent() {
     };
   };
 
-  const incomeAt65 = calculateRetirementIncome(65);
-  const incomeAt75 = calculateRetirementIncome(75);
+  const calculateRetirementProjections = (startAge: number) => {
+    const projections = [];
+    for (let i = 0; i < 30; i++) {
+      const age = startAge + i;
+      const income = calculateRetirementIncome(age);
+      projections.push({
+        age,
+        totalSavings: income.totalSavings,
+        investmentIncome: income.investmentIncome,
+        socialSecurity: income.socialSecurity,
+        totalIncome: income.totalIncome,
+        expenses: income.expenses,
+        netIncome: income.netIncome,
+      });
+    }
+    return projections;
+  };
+
+  const retirementProjections = calculateRetirementProjections(65).filter(
+    (projection) => [65, 70, 75, 80].includes(projection.age)
+  );
 
   return (
     <Card className="w-full max-w-3xl mx-auto">
@@ -77,20 +98,6 @@ export function RetirementCalculatorComponent() {
       </CardHeader>
 
       <CardContent className="space-y-6">
-        <div className="w-full p-4 bg-muted rounded-lg">
-          <h4 className="font-semibold mb-2">How to Use This Calculator:</h4>
-          <ol className="list-decimal list-inside space-y-1 text-sm">
-            <li>
-              Estimate your expected annual investment return, annual Social
-              Security benefit, and annual expenses.
-            </li>
-          </ol>
-          <p className="mt-2 text-sm text-muted-foreground">
-            Note: This calculator uses the 4% rule for estimating sustainable
-            withdrawal rates from your investments. Always consult with a
-            financial advisor for personalized advice.
-          </p>
-        </div>
         <div className="space-y-2">
           <Label htmlFor="current-age">Current Age</Label>
           <Slider
@@ -117,7 +124,8 @@ export function RetirementCalculatorComponent() {
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="annual-contribution">Annual Contribution ($)</Label>
+          <Label htmlFor="annual-contribution">Annual Contribution ($) </Label>
+          <p className=" text-sm text-muted-foreground">until age 65</p>
           <Input
             id="annual-contribution"
             type="text"
@@ -178,105 +186,59 @@ export function RetirementCalculatorComponent() {
       </CardContent>
       <CardFooter className="block">
         <h1 className="text-lg font-semibold">
-          Annual Projections at Retirement
+          Annual Projections after Retirement
         </h1>
-        <div className="flex flex-row space-x-10">
-          <div className="my-2 space-y-2 w-full ">
-            <h3 className="text-lg font-semibold ">Age 65</h3>
+        {retirementProjections.map((projection) => (
+          <div key={projection.age} className="my-4">
+            <h2 className="text-lg font-semibold">Age {projection.age}</h2>
             <table className="w-full">
               <tbody>
                 <tr>
                   <td>Total Investment:</td>
                   <td className="text-right">
-                    {formatCurrency(incomeAt65.totalSavings)}
+                    {formatCurrency(projection.totalSavings)}
                   </td>
                 </tr>
                 <tr>
                   <td>Investment Income:</td>
                   <td className="text-right">
-                    {formatCurrency(incomeAt65.investmentIncome)}
+                    {formatCurrency(projection.investmentIncome)}
                   </td>
                 </tr>
                 <tr>
                   <td>Social Security:</td>
                   <td className="text-right">
-                    {formatCurrency(incomeAt65.socialSecurity)}
+                    {formatCurrency(projection.socialSecurity)}
                   </td>
                 </tr>
                 <tr>
                   <td>Total Income:</td>
                   <td className="text-right">
-                    {formatCurrency(incomeAt65.totalIncome)}
+                    {formatCurrency(projection.totalIncome)}
                   </td>
                 </tr>
                 <tr>
                   <td>Expenses:</td>
                   <td className="text-right">
-                    {formatCurrency(incomeAt65.expenses)}
-                  </td>
-                </tr>
-                <tr>
-                  <td colSpan={2}>
-                    <hr className="border-t border-gray-300" />
+                    {formatCurrency(projection.expenses)}
                   </td>
                 </tr>
                 <tr>
                   <td className="font-bold">Net Income:</td>
                   <td className="text-right font-bold">
-                    {formatCurrency(incomeAt65.netIncome)}
+                    {formatCurrency(projection.netIncome)}
                   </td>
                 </tr>
               </tbody>
             </table>
           </div>
-          <div className="my-2 space-y-2 w-full">
-            <h3 className="text-lg font-semibold">Age 75</h3>
-            <table className="w-full">
-              <tbody>
-                <tr>
-                  <td>Total Investment:</td>
-                  <td className="text-right">
-                    {formatCurrency(incomeAt75.totalSavings)}
-                  </td>
-                </tr>
-                <tr>
-                  <td>Investment Income:</td>
-                  <td className="text-right">
-                    {formatCurrency(incomeAt75.investmentIncome)}
-                  </td>
-                </tr>
-                <tr>
-                  <td>Social Security:</td>
-                  <td className="text-right">
-                    {formatCurrency(incomeAt75.socialSecurity)}
-                  </td>
-                </tr>
-                <tr>
-                  <td>Total Income:</td>
-                  <td className="text-right">
-                    {formatCurrency(incomeAt75.totalIncome)}
-                  </td>
-                </tr>
-                <tr>
-                  <td>Annual Expenses:</td>
-                  <td className="text-right">
-                    {formatCurrency(incomeAt75.expenses)}
-                  </td>
-                </tr>
-                <tr>
-                  <td colSpan={2}>
-                    <hr className="border-t border-gray-300" />
-                  </td>
-                </tr>
-                <tr>
-                  <td className="font-bold">Net Income:</td>
-                  <td className="text-right font-bold">
-                    {formatCurrency(incomeAt75.netIncome)}
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+        ))}
+        <div className="w-full mt-6 p-4 bg-muted rounded-lg">
+          <p className="text-sm text-muted-foreground">
+            Note: This calculator uses the 4% rule for estimating sustainable
+            withdrawal rates from your investments. Always consult with a
+            financial advisor for personalized advice.
+          </p>
         </div>
       </CardFooter>
     </Card>
