@@ -11,7 +11,28 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Slider } from "@/components/ui/slider";
+import { Line } from "react-chartjs-2"; // Import Line chart from react-chartjs-2
+import {
+  Chart as ChartJS,
+  LineElement,
+  PointElement,
+  LinearScale,
+  Title,
+  Tooltip,
+  Legend,
+  CategoryScale,
+} from "chart.js";
+
+// Register necessary components for Chart.js
+ChartJS.register(
+  LineElement,
+  PointElement,
+  LinearScale,
+  Title,
+  Tooltip,
+  Legend,
+  CategoryScale
+);
 
 export function RetirementCalculatorComponent() {
   const [currentAge, setCurrentAge] = useState(30);
@@ -88,6 +109,49 @@ export function RetirementCalculatorComponent() {
     (projection) => [65, 70, 75, 80].includes(projection.age)
   );
 
+  // Prepare data for the chart
+  const chartData = {
+    labels: retirementProjections.map((projection) =>
+      projection.age.toString()
+    ),
+    datasets: [
+      {
+        label: "Total Income",
+        data: retirementProjections.map((projection) => projection.totalIncome),
+        borderColor: "rgba(75, 192, 192, 1)",
+        backgroundColor: "rgba(75, 192, 192, 0.2)",
+        fill: true,
+      },
+      {
+        label: "Expenses",
+        data: retirementProjections.map((projection) => projection.expenses),
+        borderColor: "rgba(255, 99, 132, 1)",
+        backgroundColor: "rgba(255, 99, 132, 0.2)",
+        fill: true,
+      },
+      {
+        label: "Net Income",
+        data: retirementProjections.map((projection) => projection.netIncome),
+        borderColor: "rgba(54, 162, 235, 1)",
+        backgroundColor: "rgba(54, 162, 235, 0.2)",
+        fill: true,
+      },
+    ],
+  };
+
+  // Chart options to format y-axis ticks
+  const chartOptions = {
+    scales: {
+      y: {
+        ticks: {
+          callback: function (tickValue: string | number) {
+            return `$${Number(tickValue).toLocaleString()}`; // Add dollar sign to y-axis values
+          },
+        },
+      },
+    },
+  };
+
   return (
     <Card className="w-full max-w-3xl mx-auto">
       <CardHeader>
@@ -100,17 +164,14 @@ export function RetirementCalculatorComponent() {
       <CardContent className="space-y-6">
         <div className="space-y-2">
           <Label htmlFor="current-age">Current Age</Label>
-          <Slider
+          <Input
             id="current-age"
+            type="number"
             min={20}
             max={80}
-            step={1}
-            value={[currentAge]}
-            onValueChange={(value) => setCurrentAge(value[0])}
+            value={currentAge}
+            onChange={(e) => setCurrentAge(Number(e.target.value))}
           />
-          <div className="flex justify-between text-sm text-muted-foreground">
-            <span>{currentAge} years old</span>
-          </div>
         </div>
         <div className="space-y-2">
           <Label htmlFor="current-savings">Current Investment ($)</Label>
@@ -233,6 +294,9 @@ export function RetirementCalculatorComponent() {
             </table>
           </div>
         ))}
+        <div className="">
+          <Line data={chartData} options={chartOptions} />
+        </div>
         <div className="w-full mt-6 p-4 bg-muted rounded-lg">
           <p className="text-sm text-muted-foreground">
             Note: This calculator uses the 4% rule for estimating sustainable
