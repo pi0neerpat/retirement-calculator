@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Card,
   CardContent,
@@ -42,6 +42,7 @@ export function RetirementCalculatorComponent() {
   const [socialSecurityBenefit, setSocialSecurityBenefit] = useState(20000);
   const [annualExpenses, setAnnualExpenses] = useState(50000);
   const [inflationRate, setInflationRate] = useState(3);
+  const [preRetirementData, setPreRetirementData] = useState<any[]>([]); // State for pre-retirement data
 
   const formatNumberWithCommas = (value: number) => {
     return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
@@ -63,6 +64,7 @@ export function RetirementCalculatorComponent() {
       socialSecurityBenefit *
       Math.pow(1 + inflationRate / 100, yearsUntilRetirement);
 
+    // Use the original annual contribution without inflation adjustment
     const totalSavings =
       currentSavings *
         Math.pow(1 + expectedReturn / 100, yearsUntilRetirement) +
@@ -139,7 +141,7 @@ export function RetirementCalculatorComponent() {
     ],
   };
 
-  // Chart options to format y-axis ticks
+  // Chart options to format y-axis ticks and ensure all x-axis labels are shown
   const chartOptions = {
     scales: {
       y: {
@@ -149,7 +151,81 @@ export function RetirementCalculatorComponent() {
           },
         },
       },
+      x: {
+        ticks: {
+          autoSkip: false, // Ensure all x-axis labels are shown
+        },
+      },
     },
+  };
+
+  // Function to calculate pre-retirement data
+  const calculatePreRetirementData = () => {
+    const data = [];
+    for (let age = currentAge; age <= 65; age++) {
+      const yearsUntilRetirement = age - currentAge;
+
+      // Calculate total investment using the same logic as in retirement projections
+      const totalInvestment =
+        currentSavings *
+          Math.pow(1 + expectedReturn / 100, yearsUntilRetirement) +
+        annualContribution *
+          ((Math.pow(1 + expectedReturn / 100, yearsUntilRetirement) - 1) /
+            (expectedReturn / 100));
+
+      const contributions = annualContribution * (yearsUntilRetirement + 1); // Contributions made until this age
+      const expenses =
+        annualExpenses *
+        Math.pow(1 + inflationRate / 100, yearsUntilRetirement); // Adjusted for inflation
+
+      data.push({
+        age,
+        totalInvestment: Math.round(totalInvestment),
+        contributions: Math.round(contributions),
+        expenses: Math.round(expenses),
+      });
+    }
+    setPreRetirementData(data);
+  };
+
+  // Calculate pre-retirement data when current age or other relevant states change
+  useEffect(() => {
+    calculatePreRetirementData();
+  }, [
+    currentAge,
+    currentSavings,
+    annualContribution,
+    expectedReturn,
+    inflationRate,
+    annualExpenses,
+  ]);
+
+  // Prepare data for the pre-retirement chart
+  const preRetirementChartData = {
+    labels: preRetirementData.map((item) => item.age.toString()),
+    datasets: [
+      {
+        label: "Total Investment",
+        data: preRetirementData.map((item) => item.totalInvestment),
+        borderColor: "rgba(75, 192, 192, 1)",
+        backgroundColor: "rgba(75, 192, 192, 0.2)",
+        fill: true,
+      },
+      {
+        label: "Total Contribution",
+        data: preRetirementData.map((item) => item.contributions),
+        borderColor: "rgba(54, 162, 235, 1)",
+        backgroundColor: "rgba(54, 162, 235, 0.2)",
+        fill: true,
+      },
+      {
+        label: "Expenses",
+        data: preRetirementData.map((item) => item.expenses),
+        borderColor: "rgba(255, 99, 132, 1)",
+        backgroundColor: "rgba(255, 99, 132, 0.2)",
+        fill: true,
+      },
+    ],
   };
 
   return (
@@ -294,9 +370,15 @@ export function RetirementCalculatorComponent() {
             </table>
           </div>
         ))}
-        <div className="">
-          <Line data={chartData} options={chartOptions} />
-        </div>
+
+        {/* Existing Retirement Projections Chart */}
+        <h1 className="text-lg font-semibold mt-6">Retirement Projections</h1>
+        <Line data={chartData} options={chartOptions} />
+
+        {/* New Pre-Retirement Chart */}
+        <h1 className="text-lg font-semibold mt-6">Pre-Retirement</h1>
+        <Line data={preRetirementChartData} options={chartOptions} />
+
         <div className="w-full mt-6 p-4 bg-muted rounded-lg">
           <p className="text-sm text-muted-foreground">
             Note: This calculator uses the 4% rule for estimating sustainable
