@@ -34,6 +34,13 @@ ChartJS.register(
   CategoryScale
 );
 
+interface PreRetirementData {
+  age: number;
+  totalInvestment: number;
+  contributions: number;
+  expenses: number;
+}
+
 export function RetirementCalculatorComponent() {
   const [currentAge, setCurrentAge] = useState(30);
   const [currentSavings, setCurrentSavings] = useState(100000);
@@ -42,7 +49,9 @@ export function RetirementCalculatorComponent() {
   const [socialSecurityBenefit, setSocialSecurityBenefit] = useState(20000);
   const [annualExpenses, setAnnualExpenses] = useState(50000);
   const [inflationRate, setInflationRate] = useState(3);
-  const [preRetirementData, setPreRetirementData] = useState<any[]>([]); // State for pre-retirement data
+  const [preRetirementData, setPreRetirementData] = useState<
+    PreRetirementData[]
+  >([]); // State for pre-retirement data
 
   const formatNumberWithCommas = (value: number) => {
     return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
